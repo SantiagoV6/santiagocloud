@@ -23,13 +23,10 @@
       --radius-sm: 12px;
       --shadow-deep: 0 18px 48px rgba(0, 0, 0, 0.55);
       --shadow-soft: 0 8px 32px rgba(0, 0, 0, 0.35);
-      --checkered: repeating-linear-gradient(
-        45deg,
-        rgba(255, 255, 255, 0.14) 0px,
-        rgba(255, 255, 255, 0.14) 9px,
-        rgba(18, 18, 22, 0.95) 9px,
-        rgba(18, 18, 22, 0.95) 18px
-      );
+      /* Racing flag: true checkerboard (conic), used on .card::before */
+      --checker-cell: 11px;
+      --checker-black: #0a0a0c;
+      --checker-white: #f2f2f4;
     }
 
     * { box-sizing: border-box; }
@@ -213,9 +210,14 @@
       top: 0;
       left: 0;
       right: 0;
-      height: 5px;
-      background: var(--checkered);
-      opacity: 0.92;
+      height: 16px;
+      background: repeating-conic-gradient(
+        var(--checker-black) 0% 25%,
+        var(--checker-white) 0% 50%
+      ) 0 0 / var(--checker-cell) var(--checker-cell);
+      box-shadow:
+        inset 0 -2px 0 rgba(225, 6, 0, 0.55),
+        0 2px 8px rgba(0, 0, 0, 0.35);
     }
 
     h2, h3 {
@@ -396,6 +398,10 @@
       background: linear-gradient(135deg, #34e970 0%, var(--green) 50%, #009624 100%);
     }
 
+    .priority-custom {
+      background: linear-gradient(135deg, #71717a 0%, #52525b 50%, #3f3f46 100%);
+    }
+
     .status-open {
       background: linear-gradient(135deg, #8b8b98 0%, var(--gray) 100%);
     }
@@ -407,6 +413,10 @@
 
     .status-resolved {
       background: linear-gradient(135deg, #34e970 0%, var(--green) 50%, #009624 100%);
+    }
+
+    .status-custom {
+      background: linear-gradient(135deg, #6366f1 0%, #4f46e5 50%, #4338ca 100%);
     }
 
     .ticket p {
@@ -513,6 +523,81 @@
       color: #d4d4d8;
     }
 
+    /* Glow only behind admin progress charts (bar + pie canvas areas) */
+    .chart-progress-glow {
+      position: relative;
+      margin-top: 4px;
+      padding: 12px 10px 14px;
+      border-radius: 14px;
+      isolation: isolate;
+      overflow: visible;
+    }
+
+    .chart-progress-glow::before {
+      content: "";
+      position: absolute;
+      inset: -6px -4px -8px;
+      border-radius: 18px;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0.95;
+      filter: blur(20px);
+    }
+
+    .chart-progress-glow--bar::before {
+      background: radial-gradient(
+        ellipse 92% 75% at 50% 92%,
+        rgba(225, 6, 0, 0.42) 0%,
+        rgba(225, 6, 0, 0.15) 42%,
+        rgba(255, 120, 80, 0.06) 58%,
+        transparent 72%
+      );
+    }
+
+    .chart-progress-glow--pie::before {
+      background: radial-gradient(
+        circle at 50% 48%,
+        rgba(225, 6, 0, 0.28) 0%,
+        rgba(167, 139, 250, 0.18) 42%,
+        rgba(45, 127, 249, 0.08) 58%,
+        transparent 68%
+      );
+      filter: blur(24px);
+    }
+
+    .chart-progress-glow::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 14px;
+      z-index: 0;
+      pointer-events: none;
+      box-shadow:
+        inset 0 0 0 1px rgba(225, 6, 0, 0.12),
+        0 0 32px rgba(225, 6, 0, 0.15),
+        0 0 56px rgba(225, 6, 0, 0.08);
+    }
+
+    .chart-progress-glow--pie::after {
+      box-shadow:
+        inset 0 0 0 1px rgba(255, 255, 255, 0.06),
+        0 0 28px rgba(167, 139, 250, 0.14),
+        0 0 48px rgba(225, 6, 0, 0.1);
+    }
+
+    .chart-progress-glow canvas {
+      position: relative;
+      z-index: 1;
+      display: block;
+      width: 100%;
+      height: 260px;
+      filter: drop-shadow(0 0 14px rgba(225, 6, 0, 0.22)) drop-shadow(0 8px 28px rgba(0, 0, 0, 0.55));
+    }
+
+    .chart-progress-glow--pie canvas {
+      filter: drop-shadow(0 0 12px rgba(167, 139, 250, 0.18)) drop-shadow(0 0 18px rgba(225, 6, 0, 0.12)) drop-shadow(0 8px 28px rgba(0, 0, 0, 0.55));
+    }
+
     @media (max-width: 1100px) {
       .analytics-toolbar {
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -531,6 +616,200 @@
       .stats,
       .two-col { grid-template-columns: 1fr; }
     }
+
+    .sops-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .search-bubble {
+      flex: 1;
+      min-width: 200px;
+      max-width: 420px;
+      border-radius: 999px;
+      padding: 12px 18px;
+      border: 1px solid var(--border);
+      background: linear-gradient(180deg, rgba(20, 20, 28, 0.95) 0%, rgba(10, 10, 16, 0.98) 100%);
+      box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.3), 0 4px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .search-bubble:focus {
+      border-color: rgba(225, 6, 0, 0.45);
+      box-shadow:
+        inset 0 2px 8px rgba(0, 0, 0, 0.3),
+        0 0 0 3px rgba(225, 6, 0, 0.12);
+    }
+
+    .btn-icon-plus {
+      width: 48px;
+      height: 48px;
+      min-width: 48px;
+      padding: 0;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-size: 1.65rem;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .sop-add-panel {
+      display: grid;
+      gap: 10px;
+      margin-bottom: 18px;
+      padding: 16px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-strong);
+      background: linear-gradient(160deg, rgba(255, 255, 255, 0.04), rgba(0, 0, 0, 0.12));
+    }
+
+    .sop-add-panel[hidden] {
+      display: none !important;
+    }
+
+    .sop-add-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .sop-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .sop-item {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      border-radius: var(--radius);
+      padding: 16px 16px 16px 18px;
+      border: 1px solid var(--border);
+      background: linear-gradient(145deg, rgba(26, 26, 32, 0.75) 0%, rgba(10, 10, 14, 0.9) 100%);
+      box-shadow: var(--shadow-soft), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .sop-item::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background: linear-gradient(180deg, #5b8def, #2d7ff9 50%, #1a5fcc);
+      box-shadow: 0 0 14px rgba(45, 127, 249, 0.35);
+    }
+
+    .sop-item-main {
+      flex: 1;
+      min-width: 0;
+      padding-left: 6px;
+    }
+
+    .sop-item-title {
+      margin: 0 0 8px;
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .sop-item-body {
+      margin: 0;
+      line-height: 1.55;
+      color: #d4d4d8;
+      font-size: 0.92rem;
+      white-space: pre-wrap;
+    }
+
+    .sop-item-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      flex-shrink: 0;
+    }
+
+    .sop-item-actions .btn-secondary {
+      min-width: 44px;
+      padding: 10px 12px;
+    }
+
+    .admin-lock-card {
+      max-width: 420px;
+      margin: 0 auto;
+    }
+
+    .admin-section {
+      margin-bottom: 28px;
+    }
+
+    .admin-section:last-child {
+      margin-bottom: 0;
+    }
+
+    .admin-section h3 {
+      margin-bottom: 10px;
+      font-size: 1rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .admin-option-list {
+      display: grid;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .admin-option-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: linear-gradient(145deg, rgba(26, 26, 32, 0.6) 0%, rgba(10, 10, 14, 0.85) 100%);
+    }
+
+    .admin-option-label {
+      flex: 1;
+      min-width: 120px;
+      font-weight: 600;
+    }
+
+    .admin-add-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .admin-add-row input {
+      flex: 1;
+      min-width: 180px;
+    }
+
+    .admin-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+
+    .admin-hint {
+      margin: -6px 0 18px;
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
   </style>
 </head>
 <body>
@@ -543,6 +822,8 @@
     <div class="tabs">
       <button class="tab-btn active" data-tab="ticketsTab" type="button">Tickets</button>
       <button class="tab-btn" data-tab="analyticsTab" type="button">Analytics</button>
+      <button class="tab-btn" data-tab="sopsTab" type="button">SOPs</button>
+      <button class="tab-btn" data-tab="adminTab" type="button">Admin console</button>
     </div>
 
     <div class="tab-panel active" id="ticketsTab">
@@ -560,17 +841,8 @@
             </div>
 
             <div class="two-col">
-              <select id="priority">
-                <option value="Medium">Medium Priority</option>
-                <option value="Low">Low Priority</option>
-                <option value="High">High Priority</option>
-              </select>
-
-              <select id="status">
-                <option value="Open">Open</option>
-                <option value="In Progress">In Progress</option>
-                <option value="Resolved">Resolved</option>
-              </select>
+              <select id="priority" aria-label="Priority"></select>
+              <select id="status" aria-label="Status"></select>
             </div>
 
             <textarea id="description" placeholder="Describe the issue"></textarea>
@@ -587,18 +859,8 @@
 
           <div class="toolbar">
             <input id="search" placeholder="Search tickets..." />
-            <select id="filterStatus">
-              <option value="All">All Statuses</option>
-              <option value="Open">Open</option>
-              <option value="In Progress">In Progress</option>
-              <option value="Resolved">Resolved</option>
-            </select>
-            <select id="filterPriority">
-              <option value="All">All Priorities</option>
-              <option value="High">High</option>
-              <option value="Medium">Medium</option>
-              <option value="Low">Low</option>
-            </select>
+            <select id="filterStatus" aria-label="Filter by status"></select>
+            <select id="filterPriority" aria-label="Filter by priority"></select>
             <button type="button" class="btn-secondary" id="clearAll">Delete All</button>
           </div>
 
@@ -611,12 +873,7 @@
       <div class="card" style="margin-bottom: 16px;">
         <h2>Analytics Filters</h2>
         <div class="toolbar analytics-toolbar">
-          <select id="analyticsStatusFilter">
-            <option value="All">All Ticket States</option>
-            <option value="Open">Created / Open</option>
-            <option value="In Progress">In Progress</option>
-            <option value="Resolved">Completed / Resolved</option>
-          </select>
+          <select id="analyticsStatusFilter" aria-label="Analytics status filter"></select>
           <select id="analyticsAdminFilter">
             <option value="All">All Admins</option>
           </select>
@@ -630,13 +887,17 @@
 
       <div class="analytics-grid">
         <div class="chart-box">
-          <h3>Resolved Tickets by Admin</h3>
-          <canvas id="barChart" width="500" height="260"></canvas>
+          <h3>Completed Tickets by Admin</h3>
+          <div class="chart-progress-glow chart-progress-glow--bar">
+            <canvas id="barChart" width="500" height="260"></canvas>
+          </div>
         </div>
 
         <div class="chart-box">
-          <h3>Resolved Share by Admin</h3>
-          <canvas id="pieChart" width="500" height="260"></canvas>
+          <h3>Completed Share by Admin</h3>
+          <div class="chart-progress-glow chart-progress-glow--pie">
+            <canvas id="pieChart" width="500" height="260"></canvas>
+          </div>
           <div class="legend" id="pieLegend"></div>
         </div>
       </div>
@@ -646,7 +907,7 @@
           <thead>
             <tr>
               <th>Admin</th>
-              <th>Resolved Tickets</th>
+              <th>Completed</th>
               <th>Avg. Completion Time</th>
             </tr>
           </thead>
@@ -654,11 +915,85 @@
         </table>
       </div>
     </div>
+
+    <div class="tab-panel" id="sopsTab">
+      <div class="card">
+        <h2>Standard operating procedures</h2>
+        <p style="margin: -8px 0 16px; color: var(--muted); font-size: 0.95rem; line-height: 1.5;">
+          Search, reorder, and maintain your team's SOPs. Order is saved on this device.
+        </p>
+
+        <div class="sops-toolbar">
+          <input type="search" id="sopSearch" class="search-bubble" placeholder="Search SOPs..." autocomplete="off" />
+          <button type="button" class="btn-icon-plus" id="sopAddToggle" aria-label="Add SOP">+</button>
+        </div>
+
+        <div id="sopAddPanel" class="sop-add-panel" hidden>
+          <input id="sopNewTitle" placeholder="SOP title" />
+          <textarea id="sopNewBody" placeholder="Steps or notes (optional)"></textarea>
+          <div class="sop-add-actions">
+            <button type="button" id="sopSaveNew">Add SOP</button>
+            <button type="button" class="btn-secondary" id="sopCancelAdd">Cancel</button>
+          </div>
+        </div>
+
+        <div class="sop-list" id="sopList"></div>
+      </div>
+    </div>
+
+    <div class="tab-panel" id="adminTab">
+      <div class="card admin-lock-card" id="adminLockScreen">
+        <h2>Admin console</h2>
+        <p class="admin-hint">Enter the admin password to manage dropdown options for tickets and filters.</p>
+        <div class="toolbar" style="grid-template-columns: 1fr; margin-bottom: 0;">
+          <input type="password" id="adminPassword" placeholder="Password" autocomplete="current-password" />
+          <button type="button" id="adminUnlockBtn">Unlock</button>
+        </div>
+        <p id="adminPasswordError" style="display: none; color: #f87171; font-size: 0.88rem; margin: 10px 0 0;"></p>
+      </div>
+
+      <div id="adminContent" hidden>
+        <div class="card">
+          <div class="admin-toolbar">
+            <h2 style="margin: 0; flex: 1;">Admin console</h2>
+            <button type="button" class="btn-secondary" id="adminLockBtn">Lock</button>
+          </div>
+          <p class="admin-hint">
+            Priority and status lists appear in the ticket form, queue filters, and analytics status filter.
+            Ticket workflow uses your <strong>status order</strong>: “Next” moves one step down; the last status is treated as completed (resolved time).
+          </p>
+
+          <div class="admin-section">
+            <h3>Priority options</h3>
+            <div class="admin-option-list" id="adminPriorityList"></div>
+            <div class="admin-add-row">
+              <input type="text" id="adminNewPriority" placeholder="New priority label" maxlength="80" />
+              <button type="button" id="adminAddPriorityBtn">Add</button>
+            </div>
+          </div>
+
+          <div class="admin-section">
+            <h3>Status options</h3>
+            <div class="admin-option-list" id="adminStatusList"></div>
+            <div class="admin-add-row">
+              <input type="text" id="adminNewStatus" placeholder="New status label" maxlength="80" />
+              <button type="button" id="adminAddStatusBtn">Add</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script>
     const STORAGE_KEY = "pitCrewTickets_v4";
     const LEGACY_STORAGE_KEY = "pitCrewTickets_v3";
+    const SOPS_STORAGE_KEY = "pitCrewSops_v1";
+    const DROPDOWN_OPTIONS_KEY = "pitCrewDropdownOptions_v1";
+    const DEFAULT_PRIORITIES = ["Medium", "Low", "High"];
+    const DEFAULT_STATUSES = ["Open", "In Progress", "Resolved"];
+    const ADMIN_SESSION_KEY = "pitCrewAdminSession";
+    const ADMIN_PASSWORD = "1234";
 
     const form = document.getElementById("ticketForm");
     const ticketList = document.getElementById("ticketList");
@@ -686,16 +1021,110 @@
     const exportPdfBtn = document.getElementById("exportPdfBtn");
     const saveDataBtn = document.getElementById("saveDataBtn");
 
+    const sopSearchEl = document.getElementById("sopSearch");
+    const sopAddToggleBtn = document.getElementById("sopAddToggle");
+    const sopAddPanel = document.getElementById("sopAddPanel");
+    const sopNewTitleEl = document.getElementById("sopNewTitle");
+    const sopNewBodyEl = document.getElementById("sopNewBody");
+    const sopSaveNewBtn = document.getElementById("sopSaveNew");
+    const sopCancelAddBtn = document.getElementById("sopCancelAdd");
+    const sopList = document.getElementById("sopList");
+
+    const adminLockScreen = document.getElementById("adminLockScreen");
+    const adminContent = document.getElementById("adminContent");
+    const adminPasswordEl = document.getElementById("adminPassword");
+    const adminUnlockBtn = document.getElementById("adminUnlockBtn");
+    const adminLockBtn = document.getElementById("adminLockBtn");
+    const adminPasswordError = document.getElementById("adminPasswordError");
+    const adminPriorityList = document.getElementById("adminPriorityList");
+    const adminStatusList = document.getElementById("adminStatusList");
+    const adminNewPriorityEl = document.getElementById("adminNewPriority");
+    const adminNewStatusEl = document.getElementById("adminNewStatus");
+    const adminAddPriorityBtn = document.getElementById("adminAddPriorityBtn");
+    const adminAddStatusBtn = document.getElementById("adminAddStatusBtn");
+
     const chartColors = ["#e10600", "#ffb300", "#00c853", "#2d7ff9", "#9c27b0", "#ff6f61", "#26c6da", "#8bc34a"];
 
     function makeId() {
       return Date.now().toString() + Math.random().toString(16).slice(2);
     }
 
+    function sanitizeOptionList(arr, fallback) {
+      if (!Array.isArray(arr)) return [...fallback];
+      const seen = new Set();
+      const out = [];
+      for (const x of arr) {
+        const s = String(x ?? "").trim();
+        if (!s || seen.has(s)) continue;
+        seen.add(s);
+        out.push(s);
+      }
+      return out.length ? out : [...fallback];
+    }
+
+    function loadDropdownOptions() {
+      try {
+        const raw = localStorage.getItem(DROPDOWN_OPTIONS_KEY);
+        if (!raw) {
+          return { priorities: [...DEFAULT_PRIORITIES], statuses: [...DEFAULT_STATUSES] };
+        }
+        const p = JSON.parse(raw);
+        return {
+          priorities: sanitizeOptionList(p.priorities, DEFAULT_PRIORITIES),
+          statuses: sanitizeOptionList(p.statuses, DEFAULT_STATUSES)
+        };
+      } catch {
+        return { priorities: [...DEFAULT_PRIORITIES], statuses: [...DEFAULT_STATUSES] };
+      }
+    }
+
+    let dropdownOptions = loadDropdownOptions();
+
+    function saveDropdownOptions() {
+      try {
+        localStorage.setItem(DROPDOWN_OPTIONS_KEY, JSON.stringify({
+          priorities: dropdownOptions.priorities,
+          statuses: dropdownOptions.statuses
+        }));
+      } catch (e) {
+        console.error("Could not save dropdown options:", e);
+      }
+    }
+
+    function getPriorityOptions() {
+      return dropdownOptions.priorities.slice();
+    }
+
+    function getStatusOptions() {
+      return dropdownOptions.statuses.slice();
+    }
+
+    function isTerminalStatus(status) {
+      const st = getStatusOptions();
+      return st.length > 0 && status === st[st.length - 1];
+    }
+
+    function isTicketTerminal(ticket) {
+      return isTerminalStatus(ticket.status);
+    }
+
+    function getNextStatusForTicket(ticket) {
+      const opts = getStatusOptions();
+      if (!opts.length) return null;
+      const i = opts.indexOf(ticket.status);
+      if (i < 0) return opts[0];
+      if (i < opts.length - 1) return opts[i + 1];
+      return null;
+    }
+
     function normalizeTicket(ticket) {
       if (!ticket || typeof ticket !== "object") return null;
-      const priority = ["High", "Medium", "Low"].includes(ticket.priority) ? ticket.priority : "Medium";
-      const status = ["Open", "In Progress", "Resolved"].includes(ticket.status) ? ticket.status : "Open";
+      const pr = getPriorityOptions();
+      const st = getStatusOptions();
+      const pRaw = String(ticket.priority ?? "").trim();
+      const sRaw = String(ticket.status ?? "").trim();
+      const priority = pRaw || (pr[0] || "Medium");
+      const status = sRaw || (st[0] || "Open");
       const createdAt = ticket.createdAt || new Date().toISOString();
       return {
         id: ticket.id != null && String(ticket.id).trim() !== "" ? String(ticket.id) : makeId(),
@@ -706,7 +1135,7 @@
         status,
         description: String(ticket.description ?? ""),
         createdAt,
-        resolvedAt: status === "Resolved" ? (ticket.resolvedAt || createdAt) : null
+        resolvedAt: isTerminalStatus(status) ? (ticket.resolvedAt || createdAt) : null
       };
     }
 
@@ -724,6 +1153,36 @@
     let tickets = loadTickets();
     saveTickets();
 
+    function normalizeSop(sop) {
+      if (!sop || typeof sop !== "object") return null;
+      return {
+        id: sop.id != null && String(sop.id).trim() !== "" ? String(sop.id) : makeId(),
+        title: String(sop.title ?? "").trim() || "Untitled SOP",
+        body: String(sop.body ?? "")
+      };
+    }
+
+    function loadSops() {
+      try {
+        const raw = localStorage.getItem(SOPS_STORAGE_KEY) ?? "[]";
+        const parsed = JSON.parse(raw);
+        if (!Array.isArray(parsed)) return [];
+        return parsed.map(normalizeSop).filter(Boolean);
+      } catch {
+        return [];
+      }
+    }
+
+    let sops = loadSops();
+
+    function saveSops() {
+      try {
+        localStorage.setItem(SOPS_STORAGE_KEY, JSON.stringify(sops));
+      } catch (e) {
+        console.error("Could not save SOPs:", e);
+      }
+    }
+
     function saveTickets() {
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(tickets));
@@ -739,6 +1198,71 @@
         .replaceAll(">", "&gt;")
         .replaceAll('"', "&quot;")
         .replaceAll("'", "&#039;");
+    }
+
+    function priorityOptionLabel(value) {
+      return `${value} Priority`;
+    }
+
+    function syncAllDropdownsFromOptions() {
+      const pr = getPriorityOptions();
+      const st = getStatusOptions();
+
+      const restoreValue = (select, previous, includeAll) => {
+        const allowed = new Set([...select.options].map(o => o.value));
+        if (allowed.has(previous)) {
+          select.value = previous;
+        } else if (includeAll && allowed.has("All")) {
+          select.value = "All";
+        } else if (select.options.length) {
+          select.selectedIndex = 0;
+        }
+      };
+
+      const prevP = priorityEl.value;
+      const prevS = statusEl.value;
+      const prevFS = filterStatusEl.value;
+      const prevFP = filterPriorityEl.value;
+      const prevAS = analyticsStatusFilterEl.value;
+
+      priorityEl.innerHTML = pr
+        .map(v => `<option value="${escapeHtml(v)}">${escapeHtml(priorityOptionLabel(v))}</option>`)
+        .join("");
+      restoreValue(priorityEl, prevP, false);
+
+      statusEl.innerHTML = st
+        .map(v => `<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`)
+        .join("");
+      restoreValue(statusEl, prevS, false);
+
+      filterStatusEl.innerHTML =
+        `<option value="All">All statuses</option>` +
+        st.map(v => `<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`).join("");
+      restoreValue(filterStatusEl, prevFS, true);
+
+      filterPriorityEl.innerHTML =
+        `<option value="All">All priorities</option>` +
+        pr.map(v => `<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`).join("");
+      restoreValue(filterPriorityEl, prevFP, true);
+
+      analyticsStatusFilterEl.innerHTML =
+        `<option value="All">All ticket states</option>` +
+        st.map(v => `<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`).join("");
+      restoreValue(analyticsStatusFilterEl, prevAS, true);
+    }
+
+    function priorityPillClass(priority) {
+      const map = { High: "priority-high", Medium: "priority-medium", Low: "priority-low" };
+      return map[priority] || "priority-custom";
+    }
+
+    function statusPillClass(status) {
+      const map = {
+        Open: "status-open",
+        "In Progress": "status-in-progress",
+        Resolved: "status-resolved"
+      };
+      return map[status] || "status-custom";
     }
 
     /** Closing tags built at runtime so the script block is not split by markup-like sequences in the source. */
@@ -767,17 +1291,44 @@
       return s.length > max ? `${s.slice(0, max - 1)}…` : s;
     }
 
-    function updateStats() {
+    function getStatusBucketCounts() {
+      const st = getStatusOptions();
       const total = tickets.length;
-      const open = tickets.filter(ticket => ticket.status === "Open").length;
-      const inProgress = tickets.filter(ticket => ticket.status === "In Progress").length;
-      const resolved = tickets.filter(ticket => ticket.status === "Resolved").length;
+      let firstCount = 0;
+      let midCount = 0;
+      let lastCount = 0;
+      const first = st[0];
+      const last = st.length > 0 ? st[st.length - 1] : null;
 
+      if (first != null) {
+        firstCount = tickets.filter(t => t.status === first).length;
+      }
+      if (st.length > 2) {
+        const midSet = new Set(st.slice(1, -1));
+        midCount = tickets.filter(t => midSet.has(t.status)).length;
+      }
+      if (last != null && st.length >= 2) {
+        lastCount = tickets.filter(t => t.status === last).length;
+      }
+
+      return {
+        total,
+        firstLabel: first ?? "—",
+        firstCount,
+        midLabel: st.length > 2 ? "Active" : "—",
+        midCount,
+        lastLabel: last ?? "Done",
+        lastCount
+      };
+    }
+
+    function updateStats() {
+      const b = getStatusBucketCounts();
       stats.innerHTML = `
-        <div class="stat"><div class="stat-label">Total</div><div class="stat-value">${total}</div></div>
-        <div class="stat"><div class="stat-label">Open</div><div class="stat-value">${open}</div></div>
-        <div class="stat"><div class="stat-label">In Progress</div><div class="stat-value">${inProgress}</div></div>
-        <div class="stat"><div class="stat-label">Resolved</div><div class="stat-value">${resolved}</div></div>
+        <div class="stat"><div class="stat-label">Total</div><div class="stat-value">${b.total}</div></div>
+        <div class="stat"><div class="stat-label">${escapeHtml(b.firstLabel)}</div><div class="stat-value">${b.firstCount}</div></div>
+        <div class="stat"><div class="stat-label">${escapeHtml(b.midLabel)}</div><div class="stat-value">${b.midCount}</div></div>
+        <div class="stat"><div class="stat-label">${escapeHtml(b.lastLabel)}</div><div class="stat-value">${b.lastCount}</div></div>
       `;
     }
 
@@ -804,23 +1355,97 @@
         .reverse();
     }
 
+    function getFilteredSops() {
+      const q = sopSearchEl.value.toLowerCase().trim();
+      return sops.filter(sop => {
+        if (!q) return true;
+        return (
+          String(sop.title ?? "").toLowerCase().includes(q) ||
+          String(sop.body ?? "").toLowerCase().includes(q)
+        );
+      });
+    }
+
+    function sopIndexById(id) {
+      return sops.findIndex(sop => sop.id === id);
+    }
+
+    function moveSop(id, direction) {
+      const i = sopIndexById(id);
+      if (i < 0) return;
+      const j = direction === "up" ? i - 1 : i + 1;
+      if (j < 0 || j >= sops.length) return;
+      const next = sops.slice();
+      [next[i], next[j]] = [next[j], next[i]];
+      sops = next;
+      saveSops();
+      renderSops();
+    }
+
+    function deleteSop(id) {
+      const ok = confirm("Delete this SOP?");
+      if (!ok) return;
+      sops = sops.filter(sop => sop.id !== id);
+      saveSops();
+      renderSops();
+    }
+
+    function renderSops() {
+      const filtered = getFilteredSops();
+
+      if (filtered.length === 0) {
+        const emptyMsg = sops.length === 0
+          ? "No SOPs yet. Tap + to add your first one."
+          : "No SOPs match your search.";
+        sopList.innerHTML = `<div class="empty">${escapeHtml(emptyMsg)}</div>`;
+        return;
+      }
+
+      sopList.innerHTML = filtered.map(sop => {
+        const idx = sopIndexById(sop.id);
+        const atTop = idx <= 0;
+        const atBottom = idx >= sops.length - 1;
+        return `
+        <div class="sop-item" data-id="${escapeHtml(sop.id)}">
+          <div class="sop-item-main">
+            <h3 class="sop-item-title">${escapeHtml(sop.title)}</h3>
+            <p class="sop-item-body">${escapeHtml(sop.body || "—")}</p>
+          </div>
+          <div class="sop-item-actions">
+            <button type="button" class="btn-secondary" data-action="up" data-id="${escapeHtml(sop.id)}" ${atTop ? "disabled" : ""} aria-label="Move up">↑</button>
+            <button type="button" class="btn-secondary" data-action="down" data-id="${escapeHtml(sop.id)}" ${atBottom ? "disabled" : ""} aria-label="Move down">↓</button>
+            <button type="button" class="btn-secondary" data-action="delete-sop" data-id="${escapeHtml(sop.id)}">Delete</button>
+          </div>
+        </div>
+      `;
+      }).join("");
+    }
+
+    function setSopAddPanelOpen(open) {
+      sopAddPanel.hidden = !open;
+      sopAddToggleBtn.setAttribute("aria-expanded", open ? "true" : "false");
+      if (open) {
+        sopNewTitleEl.focus();
+      } else {
+        sopNewTitleEl.value = "";
+        sopNewBodyEl.value = "";
+      }
+    }
+
     function getActionButtons(ticket) {
-      if (ticket.status === "Open") {
+      if (!isTicketTerminal(ticket)) {
+        const next = getNextStatusForTicket(ticket);
+        const label = next ? `Go to: ${next}` : "Next status";
         return `
-          <button type="button" data-action="advance" data-id="${escapeHtml(ticket.id)}">Start Work</button>
+          <button type="button" data-action="advance" data-id="${escapeHtml(ticket.id)}">${escapeHtml(label)}</button>
           <button type="button" class="btn-secondary" data-action="delete" data-id="${escapeHtml(ticket.id)}">Delete</button>
         `;
       }
 
-      if (ticket.status === "In Progress") {
-        return `
-          <button type="button" data-action="advance" data-id="${escapeHtml(ticket.id)}">Mark Resolved</button>
-          <button type="button" class="btn-secondary" data-action="delete" data-id="${escapeHtml(ticket.id)}">Delete</button>
-        `;
-      }
-
+      const st = getStatusOptions();
+      const doneLabel = st.length ? st[st.length - 1] : "Done";
       return `
-        <button type="button" disabled>Resolved</button>
+        <button type="button" disabled>${escapeHtml(doneLabel)}</button>
         <button type="button" class="btn-secondary" data-action="reopen" data-id="${escapeHtml(ticket.id)}">Reopen</button>
         <button type="button" class="btn-secondary" data-action="delete" data-id="${escapeHtml(ticket.id)}">Delete</button>
       `;
@@ -843,12 +1468,12 @@
             <div><strong>Customer:</strong> ${escapeHtml(ticket.customer)}</div>
             <div><strong>IT Admin:</strong> ${escapeHtml(ticket.admin)}</div>
             <div><strong>Created:</strong> ${escapeHtml(formatDate(ticket.createdAt))}</div>
-            <div><strong>Resolved:</strong> ${escapeHtml(formatDate(ticket.resolvedAt))}</div>
+            <div><strong>Completed:</strong> ${escapeHtml(formatDate(ticket.resolvedAt))}</div>
           </div>
 
           <div class="pills">
-            <span class="pill priority-${String(ticket.priority ?? "medium").toLowerCase()}">${escapeHtml(ticket.priority)} Priority</span>
-            <span class="pill status-${String(ticket.status ?? "open").toLowerCase().replaceAll(" ", "-")}">${escapeHtml(ticket.status)}</span>
+            <span class="pill ${priorityPillClass(ticket.priority)}">${escapeHtml(ticket.priority)} Priority</span>
+            <span class="pill ${statusPillClass(ticket.status)}">${escapeHtml(ticket.status)}</span>
           </div>
 
           <p>${escapeHtml(ticket.description || "No description.")}</p>
@@ -890,7 +1515,7 @@
 
         byAdmin[admin].ticketCount += 1;
 
-        if (ticket.status === "Resolved" && duration != null) {
+        if (isTerminalStatus(ticket.status) && duration != null) {
           byAdmin[admin].completedCount += 1;
           byAdmin[admin].totalDuration += duration;
           byAdmin[admin].durationCount += 1;
@@ -954,7 +1579,7 @@
 
       if (resolvedData.length === 0) {
         ctx.font = "16px Arial";
-        ctx.fillText("No resolved tickets yet.", 20, 40);
+        ctx.fillText("No completed tickets yet.", 20, 40);
         return;
       }
 
@@ -1005,7 +1630,7 @@
       if (resolvedData.length === 0) {
         ctx.fillStyle = "#ffffff";
         ctx.font = "16px Arial";
-        ctx.fillText("No resolved tickets yet.", 20, 40);
+        ctx.fillText("No completed tickets yet.", 20, 40);
         return;
       }
 
@@ -1070,9 +1695,7 @@
       const filteredTickets = getFilteredTickets();
       const analyticsData = getAnalyticsData();
       const totalTickets = tickets.length;
-      const openCount = tickets.filter(ticket => ticket.status === "Open").length;
-      const inProgressCount = tickets.filter(ticket => ticket.status === "In Progress").length;
-      const resolvedCount = tickets.filter(ticket => ticket.status === "Resolved").length;
+      const b = getStatusBucketCounts();
 
       const ticketFilterSummary = `Search: ${searchEl.value || "None"} | Status: ${filterStatusEl.value} | Priority: ${filterPriorityEl.value}`;
       const analyticsFilterSummary = `Status: ${analyticsStatusFilterEl.value} | Admin: ${analyticsAdminFilterEl.value}`;
@@ -1125,16 +1748,16 @@
 
   <div class="stats">
     <div class="stat"><div class="label">Total Tickets</div><div class="value">${totalTickets}</div></div>
-    <div class="stat"><div class="label">Open</div><div class="value">${openCount}</div></div>
-    <div class="stat"><div class="label">In Progress</div><div class="value">${inProgressCount}</div></div>
-    <div class="stat"><div class="label">Resolved</div><div class="value">${resolvedCount}</div></div>
+    <div class="stat"><div class="label">${escapeHtml(b.firstLabel)}</div><div class="value">${b.firstCount}</div></div>
+    <div class="stat"><div class="label">${escapeHtml(b.midLabel)}</div><div class="value">${b.midCount}</div></div>
+    <div class="stat"><div class="label">${escapeHtml(b.lastLabel)}</div><div class="value">${b.lastCount}</div></div>
   </div>
 
   <h2>Ticket View Export</h2>
   <table>
     <thead>
       <tr>
-        <th>Title</th><th>Customer</th><th>Admin</th><th>Priority</th><th>Status</th><th>Created</th><th>Resolved</th>
+        <th>Title</th><th>Customer</th><th>Admin</th><th>Priority</th><th>Status</th><th>Created</th><th>Completed</th>
       </tr>
     </thead>
     <tbody>${rowsHtml}</tbody>
@@ -1143,7 +1766,7 @@
   <h2>Analytics Summary</h2>
   <table>
     <thead>
-      <tr><th>Admin</th><th>Tickets in Filter</th><th>Resolved</th><th>Avg Completion Time</th></tr>
+      <tr><th>Admin</th><th>Tickets in Filter</th><th>Completed</th><th>Avg Completion Time</th></tr>
     </thead>
     <tbody>${analyticsRowsHtml}</tbody>
   </table>
@@ -1174,14 +1797,20 @@
       const backup = {
         exportedAt: new Date().toISOString(),
         app: "IT Pit Crew Tracker",
-        version: "v5",
+        version: "v7",
         tickets,
+        sops,
+        dropdownOptions: {
+          priorities: getPriorityOptions(),
+          statuses: getStatusOptions()
+        },
         filters: {
           ticketSearch: searchEl.value,
           ticketStatus: filterStatusEl.value,
           ticketPriority: filterPriorityEl.value,
           analyticsStatus: analyticsStatusFilterEl.value,
-          analyticsAdmin: analyticsAdminFilterEl.value
+          analyticsAdmin: analyticsAdminFilterEl.value,
+          sopSearch: sopSearchEl.value
         }
       };
 
@@ -1204,17 +1833,13 @@
     function advanceStatus(id) {
       tickets = tickets.map(ticket => {
         if (ticket.id !== id) return ticket;
-
-        const nextStatus = ticket.status === "Open"
-          ? "In Progress"
-          : ticket.status === "In Progress"
-            ? "Resolved"
-            : "Resolved";
-
+        const nextStatus = getNextStatusForTicket(ticket);
+        if (nextStatus == null || nextStatus === ticket.status) return ticket;
+        const terminal = isTerminalStatus(nextStatus);
         return {
           ...ticket,
           status: nextStatus,
-          resolvedAt: nextStatus === "Resolved"
+          resolvedAt: terminal
             ? (ticket.resolvedAt || new Date().toISOString())
             : null
         };
@@ -1226,11 +1851,12 @@
     }
 
     function reopenTicket(id) {
+      const first = getStatusOptions()[0] || "Open";
       tickets = tickets.map(ticket => {
         if (ticket.id !== id) return ticket;
         return {
           ...ticket,
-          status: "Open",
+          status: first,
           resolvedAt: null
         };
       });
@@ -1296,6 +1922,81 @@
       renderAnalytics();
     }
 
+    function isAdminUnlocked() {
+      try {
+        return sessionStorage.getItem(ADMIN_SESSION_KEY) === "1";
+      } catch {
+        return false;
+      }
+    }
+
+    function setAdminSession(on) {
+      try {
+        if (on) sessionStorage.setItem(ADMIN_SESSION_KEY, "1");
+        else sessionStorage.removeItem(ADMIN_SESSION_KEY);
+      } catch { /* ignore */ }
+    }
+
+    function refreshAdminGate() {
+      const on = isAdminUnlocked();
+      adminLockScreen.style.display = on ? "none" : "";
+      adminContent.hidden = !on;
+      if (!on) {
+        adminPasswordError.style.display = "none";
+        adminPasswordError.textContent = "";
+      }
+    }
+
+    function renderAdminOptionLists() {
+      const renderList = (container, items, kind) => {
+        if (!items.length) {
+          container.innerHTML = `<div class="empty">At least one option is required.</div>`;
+          return;
+        }
+        container.innerHTML = items.map((label, idx) => `
+        <div class="admin-option-row" data-admin-kind="${kind}" data-admin-index="${idx}">
+          <span class="admin-option-label">${escapeHtml(label)}</span>
+          <button type="button" class="btn-secondary" data-admin-action="up" ${idx === 0 ? "disabled" : ""} aria-label="Move up">↑</button>
+          <button type="button" class="btn-secondary" data-admin-action="down" ${idx === items.length - 1 ? "disabled" : ""} aria-label="Move down">↓</button>
+          <button type="button" class="btn-secondary" data-admin-action="remove" ${items.length <= 1 ? "disabled" : ""}>Remove</button>
+        </div>
+      `).join("");
+      };
+      renderList(adminPriorityList, dropdownOptions.priorities, "priority");
+      renderList(adminStatusList, dropdownOptions.statuses, "status");
+    }
+
+    function applyDropdownMutation() {
+      dropdownOptions.priorities = sanitizeOptionList(dropdownOptions.priorities, DEFAULT_PRIORITIES);
+      dropdownOptions.statuses = sanitizeOptionList(dropdownOptions.statuses, DEFAULT_STATUSES);
+      saveDropdownOptions();
+      syncAllDropdownsFromOptions();
+      tickets = tickets.map(t => normalizeTicket(t));
+      saveTickets();
+      renderTickets();
+      renderAnalytics();
+      renderAdminOptionLists();
+    }
+
+    function openAdminTab() {
+      refreshAdminGate();
+      if (isAdminUnlocked()) renderAdminOptionLists();
+      else adminPasswordEl.focus();
+    }
+
+    function tryAdminUnlock() {
+      if (adminPasswordEl.value.trim() !== ADMIN_PASSWORD) {
+        adminPasswordError.textContent = "Incorrect password.";
+        adminPasswordError.style.display = "block";
+        adminPasswordEl.focus();
+        return;
+      }
+      setAdminSession(true);
+      refreshAdminGate();
+      adminPasswordEl.value = "";
+      renderAdminOptionLists();
+    }
+
     form.addEventListener("submit", event => {
       event.preventDefault();
 
@@ -1308,7 +2009,7 @@
         status: statusEl.value,
         description: descriptionEl.value.trim(),
         createdAt: new Date().toISOString(),
-        resolvedAt: statusEl.value === "Resolved" ? new Date().toISOString() : null
+        resolvedAt: isTerminalStatus(statusEl.value) ? new Date().toISOString() : null
       };
 
       if (!ticket.title || !ticket.customer || !ticket.admin) {
@@ -1320,9 +2021,12 @@
       saveTickets();
       renderTickets();
       renderAnalytics();
-      form.reset();
-      priorityEl.value = "Medium";
-      statusEl.value = "Open";
+      titleEl.value = "";
+      customerEl.value = "";
+      adminEl.value = "";
+      descriptionEl.value = "";
+      priorityEl.value = getPriorityOptions()[0] || "";
+      statusEl.value = getStatusOptions()[0] || "";
     });
 
     [searchEl, filterStatusEl, filterPriorityEl].forEach(element => {
@@ -1355,6 +2059,97 @@
     exportPdfBtn.addEventListener("click", exportPdfReport);
     saveDataBtn.addEventListener("click", saveDataBackup);
 
+    adminUnlockBtn.addEventListener("click", tryAdminUnlock);
+    adminPasswordEl.addEventListener("keydown", e => {
+      if (e.key === "Enter") tryAdminUnlock();
+    });
+    adminLockBtn.addEventListener("click", () => {
+      setAdminSession(false);
+      refreshAdminGate();
+    });
+    adminAddPriorityBtn.addEventListener("click", () => {
+      const v = adminNewPriorityEl.value.trim();
+      if (!v) return;
+      if (dropdownOptions.priorities.includes(v)) {
+        alert("That priority already exists.");
+        return;
+      }
+      dropdownOptions.priorities.push(v);
+      adminNewPriorityEl.value = "";
+      applyDropdownMutation();
+    });
+    adminAddStatusBtn.addEventListener("click", () => {
+      const v = adminNewStatusEl.value.trim();
+      if (!v) return;
+      if (dropdownOptions.statuses.includes(v)) {
+        alert("That status already exists.");
+        return;
+      }
+      dropdownOptions.statuses.push(v);
+      adminNewStatusEl.value = "";
+      applyDropdownMutation();
+    });
+    adminContent.addEventListener("click", e => {
+      const btn = e.target.closest("[data-admin-action]");
+      if (!btn) return;
+      const row = btn.closest("[data-admin-index]");
+      if (!row) return;
+      const kind = row.dataset.adminKind;
+      const idx = Number(row.dataset.adminIndex);
+      const arr = kind === "priority" ? dropdownOptions.priorities : dropdownOptions.statuses;
+      const action = btn.dataset.adminAction;
+      if (action === "up" && idx > 0) {
+        [arr[idx - 1], arr[idx]] = [arr[idx], arr[idx - 1]];
+        applyDropdownMutation();
+      } else if (action === "down" && idx < arr.length - 1) {
+        [arr[idx + 1], arr[idx]] = [arr[idx], arr[idx + 1]];
+        applyDropdownMutation();
+      } else if (action === "remove" && arr.length > 1) {
+        arr.splice(idx, 1);
+        applyDropdownMutation();
+      }
+    });
+
+    sopAddToggleBtn.addEventListener("click", () => {
+      setSopAddPanelOpen(sopAddPanel.hidden);
+    });
+
+    sopCancelAddBtn.addEventListener("click", () => {
+      setSopAddPanelOpen(false);
+    });
+
+    sopSaveNewBtn.addEventListener("click", () => {
+      const title = sopNewTitleEl.value.trim();
+      if (!title) {
+        alert("Enter a title for the SOP.");
+        sopNewTitleEl.focus();
+        return;
+      }
+      sops.push({
+        id: makeId(),
+        title,
+        body: sopNewBodyEl.value.trim()
+      });
+      saveSops();
+      renderSops();
+      sopNewTitleEl.value = "";
+      sopNewBodyEl.value = "";
+      setSopAddPanelOpen(false);
+    });
+
+    sopSearchEl.addEventListener("input", renderSops);
+    sopSearchEl.addEventListener("search", renderSops);
+
+    sopList.addEventListener("click", event => {
+      const button = event.target.closest("button[data-action]");
+      if (!button) return;
+      const { action, id } = button.dataset;
+      if (!id) return;
+      if (action === "up") moveSop(id, "up");
+      if (action === "down") moveSop(id, "down");
+      if (action === "delete-sop") deleteSop(id);
+    });
+
     ticketList.addEventListener("click", event => {
       const button = event.target.closest("button[data-action]");
       if (!button) return;
@@ -1376,11 +2171,20 @@
         if (button.dataset.tab === "analyticsTab") {
           renderAnalytics();
         }
+        if (button.dataset.tab === "sopsTab") {
+          renderSops();
+        }
+        if (button.dataset.tab === "adminTab") {
+          openAdminTab();
+        }
       });
     });
 
+    syncAllDropdownsFromOptions();
+    refreshAdminGate();
     renderTickets();
     renderAnalytics();
+    renderSops();
   </script>
 </body>
 </html>
